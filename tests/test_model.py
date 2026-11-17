@@ -7,7 +7,7 @@ import pytest
 from custom_components.mercury_proxy.api import MercuryProxyError, Meter
 from custom_components.mercury_proxy.model import async_designation
 
-SERIAL_NUMBER = 37793503
+SERIAL_NUMBER = 20000001
 
 
 class FakeApi:

@@ -1,0 +1,89 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  # Позволяет переопубликовать GitHub Release для существующего тега,
+  # не двигая сам тег.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Существующий тег для публикации, например v1.0.0"
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  TAG_NAME: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  github-release:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+      # Тег и манифест должны называть одну версию: Marketplace показывает
+      # версию из манифеста, а заметки берутся по тегу.
+      - name: Check that the tag matches the integration version
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+
+          manifest = pathlib.Path("custom_components/mercury_proxy/manifest.json")
+          version = json.loads(manifest.read_text(encoding="utf-8"))["version"]
+          tag = os.environ["TAG_NAME"].lstrip("v")
+          if version != tag:
+              raise SystemExit(f"tag {tag!r} does not match integration version {version!r}")
+          print("integration version", version, "tag", os.environ["TAG_NAME"])
+          PY
+      - name: Take release notes from CHANGELOG.md
+        run: |
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import re
+
+          manifest = pathlib.Path("custom_components/mercury_proxy/manifest.json")
+          version = json.loads(manifest.read_text(encoding="utf-8"))["version"]
+          changelog = pathlib.Path("CHANGELOG.md")
+          text = changelog.read_text(encoding="utf-8") if changelog.exists() else ""
+          match = re.search(
+              r"^## \[%s\][^\n]*\n(.*?)(?=^## \[|\Z)" % re.escape(version),
+              text,
+              re.M | re.S,
+          )
+          if match is None:
+              raise SystemExit(f"no CHANGELOG.md section for {version}")
+          notes = match.group(1).strip()
+          pathlib.Path("release-notes.md").write_text(notes + "\n", encoding="utf-8")
+          print(f"release notes for {version}: {len(notes)} chars")
+          PY
+      # GH_REPO задан явно намеренно: шаг не должен зависеть от git remote.
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set +e
+          output=$(gh release create "$TAG_NAME" \
+            --title "Mercury $TAG_NAME" --notes-file release-notes.md 2>&1)
+          status=$?
+          echo "$output"
+          if [ $status -eq 0 ]; then
+            exit 0
+          fi
+          # Повторный запуск переписывает заметки, а не падает.
+          if grep -qi "already exists" <<< "$output"; then
+            echo "Release $TAG_NAME already exists, updating notes"
+            gh release edit "$TAG_NAME" --title "Mercury $TAG_NAME" \
+              --notes-file release-notes.md
+            exit $?
+          fi
+          echo "::error::gh release create failed: $(echo "$output" | tr '\n' ' ' | cut -c1-700)"
+          exit 1

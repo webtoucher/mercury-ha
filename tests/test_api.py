@@ -22,10 +22,10 @@ from custom_components.mercury_proxy.api import (
 TOKEN = "test-token"
 
 METER_PAYLOAD = {
-    "serial_number": 37793503,
+    "serial_number": 20000001,
     "model": "206",
     "firmware_version": "1.0",
-    "date_of_manufacture": "2021-12-07",
+    "date_of_manufacture": "2022-03-14",
     "meter_version": None,
     "features": ["RS485", "relay"],
     "port": "/dev/ttyACM0",
@@ -78,9 +78,9 @@ async def api(proxy: FakeProxy) -> AsyncIterator[MercuryProxyApi]:
 @pytest.mark.parametrize(
     ("url", "expected"),
     [
-        ("http://hm.webtoucher.ru:5054", "http://hm.webtoucher.ru:5054"),
-        ("http://hm.webtoucher.ru:5054/", "http://hm.webtoucher.ru:5054"),
-        ("hm.webtoucher.ru:5054", "http://hm.webtoucher.ru:5054"),
+        ("http://proxy.local:5054", "http://proxy.local:5054"),
+        ("http://proxy.local:5054/", "http://proxy.local:5054"),
+        ("proxy.local:5054", "http://proxy.local:5054"),
         ("https://example.com/prefix/", "https://example.com/prefix"),
     ],
 )
@@ -99,7 +99,7 @@ def test_normalize_url_rejects_garbage(url: str) -> None:
 def test_meter_from_dict() -> None:
     """Паспорт счётчика разбирается, а необязательные поля не ломают разбор."""
     meter = Meter.from_dict(METER_PAYLOAD)
-    assert meter.serial_number == 37793503
+    assert meter.serial_number == 20000001
     assert meter.model == "206"
     assert meter.features == ("RS485", "relay")
 
@@ -111,17 +111,17 @@ def test_meter_from_dict() -> None:
 async def test_meters_and_meter(api: MercuryProxyApi, proxy: FakeProxy) -> None:
     """Список счётчиков и паспорт одного счётчика читаются из ответов прокси."""
     proxy.respond("/v1.0/meters", {"meters": [METER_PAYLOAD]})
-    proxy.respond("/v1.0/meters/37793503", METER_PAYLOAD)
+    proxy.respond("/v1.0/meters/20000001", METER_PAYLOAD)
 
-    assert [meter.serial_number for meter in await api.meters()] == [37793503]
-    assert (await api.meter(37793503)).features == ("RS485", "relay")
+    assert [meter.serial_number for meter in await api.meters()] == [20000001]
+    assert (await api.meter(20000001)).features == ("RS485", "relay")
     assert proxy.headers["/v1.0/meters"]["Authorization"] == f"Bearer {TOKEN}"
 
 
 async def test_command_returns_result(api: MercuryProxyApi, proxy: FakeProxy) -> None:
     """Команда отдаёт только поле result."""
-    proxy.respond("/v1.0/meters/37793503/get_vcp", {"result": {"voltage": 233.5}})
-    assert await api.command(37793503, "get_vcp") == {"voltage": 233.5}
+    proxy.respond("/v1.0/meters/20000001/get_vcp", {"result": {"voltage": 233.5}})
+    assert await api.command(20000001, "get_vcp") == {"voltage": 233.5}
 
 
 @pytest.mark.parametrize(
