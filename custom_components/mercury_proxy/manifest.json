@@ -1,6 +1,6 @@
 {
   "domain": "mercury_proxy",
-  "name": "Mercury",
+  "name": "Инкотекс Меркурий",
   "codeowners": ["@webtoucher"],
   "config_flow": true,
   "documentation": "https://github.com/webtoucher/mercury-ha",
@@ -8,5 +8,5 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/webtoucher/mercury-ha/issues",
   "requirements": [],
-  "version": "1.0.1"
+  "version": "1.0.2"
 }
