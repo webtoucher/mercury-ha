@@ -29,6 +29,7 @@ from .api import MercuryProxyApi, MercuryProxyAuthError, MercuryProxyError, Mete
 from .const import (
     CONF_SERIAL_NUMBER,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_URL,
     DOMAIN,
     MAX_SCAN_INTERVAL,
     MIN_SCAN_INTERVAL,
@@ -36,7 +37,7 @@ from .const import (
 
 USER_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_URL, default="http://"): TextSelector(
+        vol.Required(CONF_URL, default=DEFAULT_URL): TextSelector(
             TextSelectorConfig(type=TextSelectorType.URL)
         ),
         vol.Required(CONF_TOKEN): TextSelector(

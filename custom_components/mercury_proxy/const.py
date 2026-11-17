@@ -7,6 +7,9 @@ DOMAIN: Final = "mercury_proxy"
 # Имя устройства — префикс entity_id, поэтому оно задаётся латиницей.
 MANUFACTURER: Final = "Incotex"
 
+# Адрес, которым мастер предзаполняет поле подключения к прокси.
+DEFAULT_URL: Final = "http://localhost:5054"
+
 # Прокси общается со счётчиком по одному кадру за раз, поэтому частый опрос
 # только копит очередь запросов.
 DEFAULT_SCAN_INTERVAL: Final = 60
