@@ -1,0 +1,33 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "relay": {
+        "default": "mdi:electric-switch",
+        "state": {
+          "off": "mdi:electric-switch",
+          "on": "mdi:electric-switch-closed"
+        }
+      }
+    },
+    "sensor": {
+      "current": {
+        "default": "mdi:current-ac"
+      },
+      "energy": {
+        "default": "mdi:meter-electric"
+      },
+      "frequency": {
+        "default": "mdi:cosine-wave"
+      },
+      "power": {
+        "default": "mdi:flash"
+      },
+      "tariff": {
+        "default": "mdi:cash-clock"
+      },
+      "voltage": {
+        "default": "mdi:sine-wave"
+      }
+    }
+  }
+}

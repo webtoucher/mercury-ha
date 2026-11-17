@@ -1,0 +1,77 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connection",
+        "description": "The meter is polled through the mercury-proxy service: enter its address and access token. Direct connection to the meter is not supported.",
+        "data": {
+          "url": "Address",
+          "token": "Token"
+        }
+      },
+      "meter": {
+        "title": "Meter",
+        "description": "Select the meter to poll.",
+        "data": {
+          "serial_number": "Meter"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Token update",
+        "description": "The mercury-proxy at {url} rejected the token. Enter a new one.",
+        "data": {
+          "token": "Token"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to mercury-proxy",
+      "invalid_auth": "mercury-proxy rejected the token",
+      "invalid_url": "Invalid address",
+      "no_meters": "mercury-proxy reports no connected meters",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This meter is already configured",
+      "reauth_successful": "The token was updated"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Polling",
+        "description": "The meter answers one request at a time, so frequent polling only queues requests.",
+        "data": {
+          "scan_interval": "Polling interval, seconds"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "relay": {
+        "name": "Relay"
+      }
+    },
+    "sensor": {
+      "current": {
+        "name": "Current"
+      },
+      "energy": {
+        "name": "Active energy"
+      },
+      "frequency": {
+        "name": "Mains frequency"
+      },
+      "power": {
+        "name": "Power"
+      },
+      "tariff": {
+        "name": "Tariff {number}"
+      },
+      "voltage": {
+        "name": "Voltage"
+      }
+    }
+  }
+}
