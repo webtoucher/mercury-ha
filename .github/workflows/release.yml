@@ -36,11 +36,15 @@ jobs:
           import pathlib
 
           manifest = pathlib.Path("custom_components/mercury_proxy/manifest.json")
-          version = json.loads(manifest.read_text(encoding="utf-8"))["version"]
+          data = json.loads(manifest.read_text(encoding="utf-8"))
+          version = data["version"]
           tag = os.environ["TAG_NAME"].lstrip("v")
           if version != tag:
               raise SystemExit(f"tag {tag!r} does not match integration version {version!r}")
-          print("integration version", version, "tag", os.environ["TAG_NAME"])
+          # Имя интеграции — единый источник для заголовка релиза.
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
+              env.write(f"NAME={data['name']}\n")
+          print("integration", data["name"], version, "tag", os.environ["TAG_NAME"])
           PY
       - name: Take release notes from CHANGELOG.md
         run: |
@@ -72,7 +76,7 @@ jobs:
         run: |
           set +e
           output=$(gh release create "$TAG_NAME" \
-            --title "Mercury $TAG_NAME" --notes-file release-notes.md 2>&1)
+            --title "$NAME $TAG_NAME" --notes-file release-notes.md 2>&1)
           status=$?
           echo "$output"
           if [ $status -eq 0 ]; then
@@ -81,7 +85,7 @@ jobs:
           # Повторный запуск переписывает заметки, а не падает.
           if grep -qi "already exists" <<< "$output"; then
             echo "Release $TAG_NAME already exists, updating notes"
-            gh release edit "$TAG_NAME" --title "Mercury $TAG_NAME" \
+            gh release edit "$TAG_NAME" --title "$NAME $TAG_NAME" \
               --notes-file release-notes.md
             exit $?
           fi
